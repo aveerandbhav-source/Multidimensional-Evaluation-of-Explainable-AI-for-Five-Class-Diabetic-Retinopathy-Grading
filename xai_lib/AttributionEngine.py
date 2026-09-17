@@ -167,7 +167,6 @@ class AttributionEngine:
         return self._predict_in_chunks(numpy_images)
 
     def compute_lime(self, raw_img_uint8, target_class):
-        """Runs LIME once, returns the raw explanation object."""
         np.random.seed(self.seed)
         random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -175,7 +174,7 @@ class AttributionEngine:
         explanation = self.lime_explainer.explain_instance(
             raw_img_uint8.astype('double'),
             self._lime_predict_fn,
-            top_labels=5,
+            top_labels=1,
             hide_color=0,
             num_samples=self.lime_samples,
         )
@@ -186,6 +185,8 @@ class AttributionEngine:
                 f"(only explained {list(explanation.local_exp.keys())}); increase top_labels."
             )
         return explanation
+
+    
 
     def get_lime_heatmap(self, explanation, target_class):
         """LIME heatmaps for Pointing Game"""
@@ -237,10 +238,10 @@ class AttributionEngine:
         plt.show()
 
     def close_lime_explanation(self, explanation):
-        """Explicitly drop LIME's internal segment/perturbation state."""
-        explanation.segments = None
-        explanation.local_exp = None
-        explanation.local_pred = None
+            explanation.segments = None
+            explanation.local_exp = None
+            explanation.local_pred = None
+
 
     def _shap_predict_fn(self, numpy_images):
         return self._predict_in_chunks(numpy_images)
