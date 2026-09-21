@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=XAI_notebook
+#SBATCH --job-name=MaxSens
 #SBATCH --output=notebookjob%j.log
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
