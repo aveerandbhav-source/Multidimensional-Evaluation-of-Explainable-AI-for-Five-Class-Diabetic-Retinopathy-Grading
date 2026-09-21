@@ -174,7 +174,7 @@ class AttributionEngine:
         explanation = self.lime_explainer.explain_instance(
             raw_img_uint8.astype('double'),
             self._lime_predict_fn,
-            top_labels=1,
+            labels=(target_class,),     
             hide_color=0,
             num_samples=self.lime_samples,
         )
