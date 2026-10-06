@@ -70,7 +70,7 @@ class AttributionEngine:
 
         self._norm_transform = transforms.Normalize(mean=self.IMAGENET_MEAN.tolist(), std=self.IMAGENET_STD.tolist()) # Stores the standard ImageNet normalization
         self.shap_explainer = None  # Built lazily on first compute_shap() call, once we know the image shape
-        self.lime_explainer = lime_image.LimeImageExplainer()
+        self.lime_explainer = lime_image.LimeImageExplainer(random_state=np.random.RandomState(self.seed))
 
     def find_gradcam_target_layer(self):
       if hasattr(self.model, "layer4"):
@@ -98,20 +98,24 @@ class AttributionEngine:
         img = np.clip(img, 0.0, 1.0)
         return (img * 255).astype(np.uint8)
 
-    @staticmethod
-    def normalize_map(m, pct_clip=99.0, mode="abs"):
-        m = np.nan_to_num(m.astype(np.float32))
-        if mode == "abs":
-            m = np.abs(m)
-        elif mode == "pos":
-            m = np.clip(m, 0, None)
-        else:
-            raise ValueError(f"Unknown normalize mode: {mode!r} (expected 'abs' or 'pos')")
+    def uint8_to_model_input(self, raw_uint8):
+        t=torch.from_numpy(raw_uint8).float().div(255.0).permute(2,0,1)
+        return self._norm_transform(t).unsqueeze(0).to(self.device)
 
-        if m.max() > 0:
-            clip_val = np.percentile(m, pct_clip)
-            if clip_val > 0:
-                m = np.clip(m, 0, clip_val)
+    @staticmethod
+    def normalize_map(m):
+        m = np.nan_to_num(m.astype(np.float32))  
+        mn, mx = m.min(), m.max()
+        if mx - mn > 1e-12:
+            m = (m - mn) / (mx - mn)
+        else:
+            m = np.zeros_like(m)
+        return m
+    
+    @staticmethod
+    def localization_normalize_map(m):
+        m = np.nan_to_num(m.astype(np.float32))  
+        m = np.clip(m, 0, None)
         mn, mx = m.min(), m.max()
         if mx - mn > 1e-12:
             m = (m - mn) / (mx - mn)
@@ -130,7 +134,15 @@ class AttributionEngine:
         cam = self.get_gradcam()
         targets = [ClassifierOutputTarget(target_class)]
         grayscale_cam = cam(input_tensor=img, targets=targets)[0]
-        heatmap = self.normalize_map(grayscale_cam, mode="abs")
+        heatmap = self.normalize_map(grayscale_cam)
+        return self.resize_map(heatmap)
+
+    def compute_localization_gradcam(self, img, target_class):
+        """Computes and returns the Grad-CAM heatmap for localization evaluation"""
+        cam = self.get_gradcam()
+        targets = [ClassifierOutputTarget(target_class)]
+        grayscale_cam = cam(input_tensor=img, targets=targets)[0]
+        heatmap = self.localization_normalize_map(grayscale_cam)
         return self.resize_map(heatmap)
 
     def show_grad_cam(self, img, raw_img_uint8, target_class):
@@ -167,16 +179,14 @@ class AttributionEngine:
         return self._predict_in_chunks(numpy_images)
 
     def compute_lime(self, raw_img_uint8, target_class):
-        np.random.seed(self.seed)
-        random.seed(self.seed)
-        torch.manual_seed(self.seed)
-
+        self.lime_explainer.random_state.seed(self.seed)
         explanation = self.lime_explainer.explain_instance(
             raw_img_uint8.astype('double'),
             self._lime_predict_fn,
-            labels=(target_class,),     
+            top_labels=5,
             hide_color=0,
             num_samples=self.lime_samples,
+            random_seed=self.seed,
         )
 
         if target_class not in explanation.local_exp:
@@ -185,14 +195,20 @@ class AttributionEngine:
                 f"(only explained {list(explanation.local_exp.keys())}); increase top_labels."
             )
         return explanation
-
     
 
     def get_lime_heatmap(self, explanation, target_class):
-        """LIME heatmaps for Pointing Game"""
+        """LIME heatmaps"""
         dict_heatmap = dict(explanation.local_exp[target_class])
         heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
-        heatmap = self.normalize_map(heatmap, mode="pos")
+        heatmap = self.normalize_map(heatmap)
+        return self.resize_map(heatmap)
+
+    def get_lime_localization_heatmap(self, explanation, target_class):
+        """LIME heatmaps"""
+        dict_heatmap = dict(explanation.local_exp[target_class])
+        heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
+        heatmap = self.localization_normalize_map(heatmap)
         return self.resize_map(heatmap)
 
     def show_lime(self, raw_img_uint8, target_class, num_features=5, positive_only=True):
@@ -238,10 +254,9 @@ class AttributionEngine:
         plt.show()
 
     def close_lime_explanation(self, explanation):
-            explanation.segments = None
-            explanation.local_exp = None
-            explanation.local_pred = None
-
+        explanation.segments = None
+        explanation.local_exp = None
+        explanation.local_pred = None
 
     def _shap_predict_fn(self, numpy_images):
         return self._predict_in_chunks(numpy_images)
@@ -256,9 +271,6 @@ class AttributionEngine:
 
     def compute_shap(self, raw_img_uint8, target_class=None, all_classes=True):
         """Return the SHAP values for the given image."""
-        np.random.seed(self.seed)
-        random.seed(self.seed)
-        torch.manual_seed(self.seed)
 
         if self.shap_explainer is None:
             self._build_shap_explainer(raw_img_uint8.shape)
@@ -273,7 +285,14 @@ class AttributionEngine:
         """SHAP heatmaps for Pointing Game"""
         raw_shap = shap_values.values[0, :, :, :, class_position]
         sv_signed = raw_shap.sum(axis=-1)
-        heatmap = self.normalize_map(sv_signed, mode="pos")
+        heatmap = self.normalize_map(sv_signed)
+        return self.resize_map(heatmap), self.resize_map(sv_signed)
+
+    def get_shap_localization_heatmap(self, shap_values, class_position=0):
+        """SHAP heatmaps for Pointing Game"""
+        raw_shap = shap_values.values[0, :, :, :, class_position]
+        sv_signed = raw_shap.sum(axis=-1)
+        heatmap = self.localization_normalize_map(sv_signed)
         return self.resize_map(heatmap), self.resize_map(sv_signed)
 
     def show_shap(self, raw_img_uint8, target_class=None, all_classes=True):
@@ -284,11 +303,13 @@ class AttributionEngine:
     def compute_all(self, img_tensor, label):
         """Runs all the XAI techniques at once, returns a dictionary with the results."""
         self.model.eval()
-        img = img_tensor.unsqueeze(0).to(self.device)
+
+        raw_img_uint8 = self.unnormalize_to_uint8(img_tensor)
+        img = self.uint8_to_model_input(raw_img_uint8)
+
         with torch.no_grad():
             pred = self.model(img).argmax(dim=1).item()
 
-        raw_img_uint8 = self.unnormalize_to_uint8(img_tensor)
         gradcam_map = self.compute_gradcam(img, pred)
 
         lime_explanation = self.compute_lime(raw_img_uint8, pred)
@@ -302,3 +323,27 @@ class AttributionEngine:
 
         del img, raw_img_uint8
         return {'lime': lime_map, 'shap': shap_map, 'visual_shap': sv_signed, 'gradcam': gradcam_map, 'pred': pred}
+
+    def localization_compute_all(self, img_tensor, label=None):
+        self.model.eval()
+
+        raw_img_uint8 = self.unnormalize_to_uint8(img_tensor)
+        img = self.uint8_to_model_input(raw_img_uint8)
+
+        with torch.no_grad():
+            pred = self.model(img).argmax(dim=1).item()
+
+        gradcam_map = self.compute_localization_gradcam(img, pred)
+
+        lime_explanation = self.compute_lime(raw_img_uint8, pred)
+        lime_map = self.get_lime_localization_heatmap(lime_explanation, pred)
+        self.close_lime_explanation(lime_explanation)
+        del lime_explanation
+
+        shap_values = self.compute_shap(raw_img_uint8, target_class=pred, all_classes=False)
+        shap_map, sv_signed = self.get_shap_localization_heatmap(shap_values, class_position=0)
+        del shap_values
+
+        del img, raw_img_uint8
+        return {'lime': lime_map, 'shap': shap_map, 'visual_shap': sv_signed, 'gradcam': gradcam_map, 'pred': pred}
+        

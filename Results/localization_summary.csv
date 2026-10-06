@@ -1,0 +1,7 @@
+model,method,pointing_game,threshold iou,no threshold iou
+resnet50,gradcam,0.5926,0.0484,0.0665
+resnet50,lime,0.7037,0.0274,0.0371
+resnet50,shap,0.7037,0.0601,0.0637
+efficientnetb0,gradcam,0.7654,0.0829,0.0871
+efficientnetb0,lime,0.8272,0.0531,0.0578
+efficientnetb0,shap,0.7654,0.0668,0.0713
