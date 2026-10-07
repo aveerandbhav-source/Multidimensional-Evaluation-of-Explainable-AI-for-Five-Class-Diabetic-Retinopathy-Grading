@@ -1,0 +1,9 @@
+model,method,del_auc,ins_auc,n
+efficientnetb0,GradCAM,0.1945,0.433,81
+efficientnetb0,LIME,0.2174,0.3747,81
+efficientnetb0,Random,0.1477,0.3124,81
+efficientnetb0,SHAP,0.1812,0.4443,81
+resnet50,GradCAM,0.1975,0.4423,81
+resnet50,LIME,0.1917,0.3072,81
+resnet50,Random,0.1774,0.2867,81
+resnet50,SHAP,0.1711,0.4746,81

@@ -1,7 +1,7 @@
-model,method,pointing_game,threshold iou,no threshold iou
-resnet50,gradcam,0.5926,0.0484,0.0665
-resnet50,lime,0.7037,0.0274,0.0371
-resnet50,shap,0.7037,0.0601,0.0637
-efficientnetb0,gradcam,0.7654,0.0829,0.0871
-efficientnetb0,lime,0.8272,0.0531,0.0578
-efficientnetb0,shap,0.7654,0.0668,0.0713
+model,method,pointing_game,iou_adaptive,iou_otsu,recall_adaptive,recall_otsu
+resnet50,gradcam,0.0864,0.0513,0.0693,0.0901,0.4635
+resnet50,lime,0.5556,0.0279,0.0394,0.0597,0.2139
+resnet50,shap,0.716,0.0602,0.0654,0.1162,0.308
+efficientnetb0,gradcam,0.2222,0.0866,0.0852,0.1498,0.5308
+efficientnetb0,lime,0.7778,0.0527,0.0618,0.1116,0.3244
+efficientnetb0,shap,0.716,0.0662,0.0703,0.1281,0.3612
