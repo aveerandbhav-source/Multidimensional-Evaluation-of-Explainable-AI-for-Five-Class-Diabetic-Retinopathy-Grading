@@ -21,7 +21,7 @@ MaxSens.ipynb (maxsens.sh) -> RISEDisplay.ipynb (RISEDisplay.sh) -> confidence.i
 Additioanlly, to run all the code, you will need the AttributionEngine.py and MemoryManagement.py files that can be found in the xai_lib folder. Ensure that you have the xai_lib folder (containing AttributionEngine.py and MemoryManagement.py) in the same directory as the notebooks. For example, this is how we had it setup using HIPPO (UKZN): 
 
 ```text
-Code folder/
+/home/{name}/
 ├── xai_lib/
 │   ├── AttributionEngine.py
 │   └── MemoryManagement.py
@@ -40,3 +40,22 @@ Code folder/
 ├── confidence.ipynb
 └── confidence.sh
 ```
+
+Model Training:
+Before running model training notebooks (ResNet.ipynb and EffNet.ipynb), if you are using HIPPO, make sure you have the pretrained weights saved in the torche_cache folder in your data directory.The ResNet50 and EfficientNetB0 models start from pretrained weights, which PyTorch downloads and caches under $TORCH_HOME/hub/checkpoints/. On HIPPO the compute nodes may not have internet access, so download the weights once on the login node before submitting the training jobs. Choose a cache directory and set TORCH_HOME. For example, /data/aveera/torch-cache, so replace this with your own path.
+
+To run ResNet.ipynb and EffNet.ipynb, please ensure you set the paths for variables DRIVE_MODEL_DIR, TRAIN_DF_DIR, TRAIN_IMAGES_DIR and CROPPED_IMAGE_DIR with your own paths.
+
+To run IDRiD_preprocessing.ipynb, ensure you set the variables PREPROCESSED_DIR and IDRID_DIR with your own paths.
+
+To run FinalLocalFaith.ipynb, ensure you set the variables PREPROCESSED_DIR, DRIVE_MODEL_DIR, LOCALIZATION_SAVE_DIR, SAVE_DIR, RESULTS_DIR and FIGURES_DIR with your own paths.
+
+To run MaxSens.ipynb, ensure you set the variables IDRID_DIR, drive_model_dir. RESULTS_DIR and CHECKPOINT_DIR with your own paths.
+
+To run RISEDisplay.ipynb, ensure you set the variables RESULTS_DIR to your own path.
+
+To run confidence.ipynb, ensure you set the variables DATA_DIR, OUTPUT_DIR, IROF_FILES, RISE_FILE and MAXSENS_FILE with their own paths and names.
+
+Comments accompanying the variables will tell you what the paths represent.
+
+All results can be found in the github repository: 
