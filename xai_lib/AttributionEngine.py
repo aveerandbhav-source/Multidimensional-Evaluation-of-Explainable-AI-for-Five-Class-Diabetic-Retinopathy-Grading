@@ -46,6 +46,16 @@ import ctypes
 import resource
 
 class AttributionEngine:
+    """
+    Unified wrapper for generating XAI attribution maps for the moedls. Wraps the XAI techniques behind one interface, dealing with Grad-CAM, LIME and SHAP.
+    
+    Two types of attribution maps are produced depending on normalisation. The first is MinMax normalisation which is used for faithfulness evaluations, the second 
+    clips out negative attributes before normalisaitn and can be used for localisation evaluations.
+
+    The engine also genrates visualisations for all XAI techniques.
+
+    Aknowledgements: https://github.com/SivaSubramaniyenM/ecs-xai/blob/main/src/ecs_metric.py
+    """
     IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
     IMAGENET_STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
     CLASS_NAMES = ["No DR","Mild DR","Moderate DR","Severe DR", "Proliferative DR"]
@@ -73,6 +83,7 @@ class AttributionEngine:
         self.lime_explainer = lime_image.LimeImageExplainer(random_state=np.random.RandomState(self.seed))
 
     def find_gradcam_target_layer(self):
+      """The target convolutional layer needed for Grad-CAM to generate their heatmaps"""
       if hasattr(self.model, "layer4"):
           target_layer = self.model.layer4[-1]
       elif hasattr(self.model, "features"):
@@ -99,11 +110,13 @@ class AttributionEngine:
         return (img * 255).astype(np.uint8)
 
     def uint8_to_model_input(self, raw_uint8):
+        """Opposite of unnormalize_to_uint8: uint8 H,W,C becomes a normalized (1,3,H,W) tensor on device."""
         t=torch.from_numpy(raw_uint8).float().div(255.0).permute(2,0,1)
         return self._norm_transform(t).unsqueeze(0).to(self.device)
 
     @staticmethod
     def normalize_map(m):
+        """Min max normalisation"""
         m = np.nan_to_num(m.astype(np.float32))  
         mn, mx = m.min(), m.max()
         if mx - mn > 1e-12:
@@ -114,6 +127,7 @@ class AttributionEngine:
     
     @staticmethod
     def localization_normalize_map(m):
+        """Clipping out zero attribution and Min max normalisation"""
         m = np.nan_to_num(m.astype(np.float32))  
         m = np.clip(m, 0, None)
         mn, mx = m.min(), m.max()
@@ -179,6 +193,7 @@ class AttributionEngine:
         return self._predict_in_chunks(numpy_images)
 
     def compute_lime(self, raw_img_uint8, target_class):
+        """Generating the LIME explanation"""
         self.lime_explainer.random_state.seed(self.seed)
         explanation = self.lime_explainer.explain_instance(
             raw_img_uint8.astype('double'),
@@ -198,14 +213,14 @@ class AttributionEngine:
     
 
     def get_lime_heatmap(self, explanation, target_class):
-        """LIME heatmaps"""
+        """Generating the LIME heatmap"""
         dict_heatmap = dict(explanation.local_exp[target_class])
         heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
         heatmap = self.normalize_map(heatmap)
         return self.resize_map(heatmap)
 
     def get_lime_localization_heatmap(self, explanation, target_class):
-        """LIME heatmaps"""
+        """Generating the LIME heatmap using localisation normalisation"""
         dict_heatmap = dict(explanation.local_exp[target_class])
         heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
         heatmap = self.localization_normalize_map(heatmap)
@@ -282,14 +297,14 @@ class AttributionEngine:
         return self.shap_explainer(images_batch,max_evals=self.shap_max_evals,batch_size=self.shap_batch_size,outputs=outputs,)
 
     def get_shap_heatmap(self, shap_values, class_position=0):
-        """SHAP heatmaps for Pointing Game"""
+        """Generating the SHAP heatmaps"""
         raw_shap = shap_values.values[0, :, :, :, class_position]
         sv_signed = raw_shap.sum(axis=-1)
         heatmap = self.normalize_map(sv_signed)
         return self.resize_map(heatmap), self.resize_map(sv_signed)
 
     def get_shap_localization_heatmap(self, shap_values, class_position=0):
-        """SHAP heatmaps for Pointing Game"""
+        """Generating the SHAP heatmaps for localisation"""
         raw_shap = shap_values.values[0, :, :, :, class_position]
         sv_signed = raw_shap.sum(axis=-1)
         heatmap = self.localization_normalize_map(sv_signed)
@@ -325,6 +340,7 @@ class AttributionEngine:
         return {'lime': lime_map, 'shap': shap_map, 'visual_shap': sv_signed, 'gradcam': gradcam_map, 'pred': pred}
 
     def localization_compute_all(self, img_tensor, label=None):
+        """Runs all the XAI techniques at once with localisation normalisation, returns a dictionary with the results."""
         self.model.eval()
 
         raw_img_uint8 = self.unnormalize_to_uint8(img_tensor)

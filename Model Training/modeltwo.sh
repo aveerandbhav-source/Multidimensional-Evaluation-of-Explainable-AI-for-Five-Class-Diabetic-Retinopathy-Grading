@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=Complexity
+#SBATCH --job-name=ModelTwo
 #SBATCH --output=notebookjob%j.log
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
@@ -19,14 +19,7 @@ source /data/aveera/venv/bin/activate
 
 #Add virtual environment library directory to search path
 export LD_LIBRARY_PATH=/apps/foss2020b/software/Python/3.8.6-GCCcore-10.2.0/lib:$LD_LIBRARY_PATH
-export TQDM_DISABLE=1  
-
-export MALLOC_ARENA_MAX=2
-
-export OMP_NUM_THREADS=1
-export OPENBLAS_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export NUMEXPR_NUM_THREADS=1 
+export TQDM_DISABLE=1   
 
 #Run the notebook headlessly using the environment's python executable
-/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute Complexity.ipynb --output executed_Complexity.ipynb
+/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute ModelTwo.ipynb --output executed_ModelTwo.ipynb
