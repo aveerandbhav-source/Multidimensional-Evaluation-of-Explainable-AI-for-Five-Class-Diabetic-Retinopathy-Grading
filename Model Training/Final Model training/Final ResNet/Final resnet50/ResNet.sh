@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=LocalAndFaith
+#SBATCH --job-name=ResNet
 #SBATCH --output=notebookjob%j.log
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
@@ -22,4 +22,4 @@ export LD_LIBRARY_PATH=/apps/foss2020b/software/Python/3.8.6-GCCcore-10.2.0/lib:
 export TQDM_DISABLE=1   
 
 #Run the notebook headlessly using the environment's python executable
-/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute LocalAndFaith.ipynb --output executed_LocalAndFaith.ipynb
+/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute ResNet.ipynb --output executed_ResNet.ipynb

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=test_eff
+#SBATCH --job-name=EffNet
 #SBATCH --output=notebookjob%j.log
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
@@ -22,4 +22,4 @@ export LD_LIBRARY_PATH=/apps/foss2020b/software/Python/3.8.6-GCCcore-10.2.0/lib:
 export TQDM_DISABLE=1   
 
 #Run the notebook headlessly using the environment's python executable
-/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute test_eff.ipynb --output executed_test_eff.ipynb
+/data/aveera/venv/bin/python -m jupyter nbconvert --to notebook --execute EffNet.ipynb --output executed_EffNet.ipynb
