@@ -1,0 +1,4 @@
+method,mean_irof_auc,std_irof_auc,n_images
+SHAP,0.31,0.24,81
+GradCAM,0.3206,0.2503,81
+LIME,0.403,0.2375,81

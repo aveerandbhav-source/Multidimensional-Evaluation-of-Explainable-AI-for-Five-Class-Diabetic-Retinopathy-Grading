@@ -1,0 +1,7 @@
+model,method,mean_maxsens,std_maxsens,mean_ssim_dist,mean_spearman_dist,n_valid,n_failed
+efficientnetb0,GradCAM,1.0284,0.2498,0.7347,0.909,80,1
+efficientnetb0,LIME,1.58,0.204,0.9901,0.991,81,0
+efficientnetb0,SHAP,1.3514,0.2557,0.8848,0.8791,81,0
+resnet50,GradCAM,0.8591,0.2527,0.5854,0.6263,81,0
+resnet50,LIME,1.4243,0.2878,0.9622,0.7719,81,0
+resnet50,SHAP,1.101,0.2781,0.7393,0.5276,81,0

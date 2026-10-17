@@ -1,0 +1,7 @@
+model,method,mean_irof_auc,std_irof_auc,n_images
+efficientnetb0,GradCAM,0.3206,0.2503,81
+efficientnetb0,LIME,0.403,0.2375,81
+efficientnetb0,SHAP,0.31,0.24,81
+resnet50,GradCAM,0.3946,0.2756,81
+resnet50,LIME,0.449,0.3866,81
+resnet50,SHAP,0.3315,0.3481,81
