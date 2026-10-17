@@ -20,21 +20,21 @@ MaxSens.ipynb (maxsens.sh) -> RISEDisplay.ipynb (RISEDisplay.sh) -> confidence.i
 
 Additioanlly, to run all the code, you will need the AttributionEngine.py and MemoryManagement.py files that can be found in the xai_lib folder. Ensure that you have the xai_lib folder (containing AttributionEngine.py and MemoryManagement.py) in the same directory as the notebooks. For example, this is how we had it setup using HIPPO (UKZN): 
 
-```mermaid
-graph LR
-    A[XAI evaluation] --> B(xai_lib)
-    B --> C(ResNet.ipynb)
-    C --> D(EffNet.ipynb)
-    D --> E(IDRiD_preprocessing.ipynb)
-    E --> F(FinalLocalFaith.ipynb)
-    F --> G(MaxSens.ipynb)
-    G --> H(RISEDisplay.ipynb)
-    H --> I(confidence.ipynb)
-    I --> J(ResNet.sh)
-    J --> K(EffNet.sh)
-    K --> L(preprocess.sh)
-    L --> M(finallocalandfaith.sh)
-    M --> N(maxsens.sh)
-    N --> O(RISEDisplay.sh)
-    O --> P(confidence.sh)
-```
+Code folder/
+├── xai_lib/
+│   ├── AttributionEngine.py
+│   └── MemoryManagement.py
+├── ResNet.ipynb             
+├── ResNet.sh
+├── EffNet.ipynb             
+├── EffNet.sh
+├── IDRiD_preprocessing.ipynb
+├── preprocess.sh
+├── FinalLocalFaith.ipynb
+├── finallocalandfaith.sh
+├── MaxSens.ipynb
+├── maxsens.sh
+├── RISEDisplay.ipynb
+├── RISEDisplay.sh
+├── confidence.ipynb
+└── confidence.sh
