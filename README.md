@@ -2,6 +2,8 @@
 
 A comparative study of XAI techniques for Diabetic Retinopathy detection using deployable detection models such as a ResNet50 and an EfficientNetB0. XAI techniques used include Grad-CAM, LIME and SHAP.
 
+# **HOW TO RUN:**
+
 All computations were performed on Hippo at the University of KwaZulu-Natal. All our code was run Python/3.8.6. If you are running your code using UKZN Hippo, run this command: "module load Python/3.8.6-GCCcore-10.2.0". All python notebooks that have been executed have a corresponding batch script that was used to execute it. All batch scripts can be found in the saame directory as their corresponding notebook. If you are runing your code on HIPPO (UKZN), you will need to convert your batch scripts to Unix/Linux format using the command "dos2unix example.sh", and please ensure you set the path for the working directory, virtual enviornment and path to notebook to match your setup. 
 
 Requirements: You will find a requirements.txt that has all the necessary libraries that have to be installed. We recommend you create a virtual enviornment before installing all these libraries. Once you have activated your virtual enviornment, the command "pip install -r requirements.txt" should install most things. Additionally run the command "pip install opencv-python-headless" to install opencv-python-headless. Now you should have all the libraries installed.
