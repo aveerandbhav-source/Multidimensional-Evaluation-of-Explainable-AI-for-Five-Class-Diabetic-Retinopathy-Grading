@@ -1,4 +1,5 @@
 method,mean_irof_auc,std_irof_auc,n_images
 SHAP,0.3315,0.3481,81
 GradCAM,0.3946,0.2756,81
+Random,0.4186,0.3821,81
 LIME,0.449,0.3866,81

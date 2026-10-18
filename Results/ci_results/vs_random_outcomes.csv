@@ -1,0 +1,19 @@
+metric,model,A,mean_diff,ci_low,ci_high,p_holm,evidence,outcome
+irof_auc,resnet50,GradCAM,-0.0239,-0.0796,0.0309,0.8895,none,not distinguishable from random
+irof_auc,resnet50,LIME,0.0304,-0.0262,0.086,0.1495,none,not distinguishable from random
+irof_auc,resnet50,SHAP,-0.087,-0.142,-0.0306,0.0001,both,better than random
+irof_auc,efficientnetb0,GradCAM,-0.1528,-0.2005,-0.1047,0.0,both,better than random
+irof_auc,efficientnetb0,LIME,-0.0704,-0.1284,-0.0153,0.0676,mixed,not distinguishable from random
+irof_auc,efficientnetb0,SHAP,-0.1634,-0.2098,-0.1193,0.0,both,better than random
+del_auc,resnet50,GradCAM,0.0222,-0.029,0.072,0.0047,mixed,WORSE than random
+del_auc,resnet50,LIME,0.0128,-0.0353,0.0595,0.1557,none,not distinguishable from random
+del_auc,resnet50,SHAP,-0.0079,-0.0602,0.0417,0.1557,none,not distinguishable from random
+del_auc,efficientnetb0,GradCAM,0.0498,0.0207,0.0772,0.0001,both,WORSE than random
+del_auc,efficientnetb0,LIME,0.0802,0.0356,0.122,0.0001,both,WORSE than random
+del_auc,efficientnetb0,SHAP,0.0376,-0.0014,0.0729,0.0031,mixed,WORSE than random
+ins_auc,resnet50,GradCAM,0.1602,0.1144,0.206,0.0,both,better than random
+ins_auc,resnet50,LIME,0.0175,-0.0308,0.0666,0.6666,none,not distinguishable from random
+ins_auc,resnet50,SHAP,0.189,0.1455,0.235,0.0,both,better than random
+ins_auc,efficientnetb0,GradCAM,0.1168,0.0664,0.168,0.001,both,better than random
+ins_auc,efficientnetb0,LIME,0.0568,0.0211,0.0935,0.0131,both,better than random
+ins_auc,efficientnetb0,SHAP,0.1276,0.0732,0.1827,0.0016,both,better than random
