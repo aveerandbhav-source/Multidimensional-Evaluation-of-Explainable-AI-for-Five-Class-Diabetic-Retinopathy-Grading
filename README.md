@@ -60,4 +60,4 @@ To run confidence.ipynb, ensure you set the variables DATA_DIR, OUTPUT_DIR, IROF
 
 Comments accompanying the variables will tell you what the paths represent.
 
-All results can be found in the github repository: 
+All results can be found in the github repository: https://github.com/aveerandbhav-source/Multidimensional-Evaluation-of-Explainable-AI-for-Five-Class-Diabetic-Retinopathy-Grading
